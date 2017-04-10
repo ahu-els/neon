@@ -16,11 +16,12 @@ const (
 	DEFAULT_BUILD_FILE = "build.yml"
 )
 
-func ParseCommandLine() (string, bool, string, bool, bool, string, bool, bool, string, bool, []string) {
+func ParseCommandLine() (string, bool, string, bool, string, bool, string, bool, bool, string, bool, []string) {
 	file := flag.String("file", DEFAULT_BUILD_FILE, "Build file to run")
 	help := flag.Bool("build", false, "Print build help")
 	props := flag.String("props", "", "Build properties")
 	timeit := flag.Bool("time", false, "Print build duration")
+	get := flag.String("get", "", "Get plugin")
 	tasks := flag.Bool("tasks", false, "Print tasks list")
 	task := flag.String("task", "", "Print help on given task")
 	targs := flag.Bool("targets", false, "Print targets list")
@@ -29,7 +30,7 @@ func ParseCommandLine() (string, bool, string, bool, bool, string, bool, bool, s
 	refs := flag.Bool("refs", false, "Print tasks and builtins reference")
 	flag.Parse()
 	targets := flag.Args()
-	return *file, *help, *props, *timeit, *tasks, *task, *targs, *builtins, *builtin,
+	return *file, *help, *props, *timeit, *get, *tasks, *task, *targs, *builtins, *builtin,
 		*refs, targets
 }
 
@@ -56,7 +57,7 @@ func FindBuildFile(name string) (string, error) {
 
 func main() {
 	start := time.Now()
-	file, help, props, timeit, tasks, task, targs, builtins, builtin, refs, targets := ParseCommandLine()
+	file, help, props, timeit, get, tasks, task, targs, builtins, builtin, refs, targets := ParseCommandLine()
 	// options that do not require we load build file
 	if tasks {
 		_build.PrintTasks()
@@ -82,6 +83,9 @@ func main() {
 	if props != "" {
 		err = build.SetProperties(props)
 		PrintError(err, 3)
+	}
+	if get != "" {
+		data := build.Get(get)
 	}
 	err = build.Init()
 	PrintError(err, 4)

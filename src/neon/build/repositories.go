@@ -1,35 +1,35 @@
 package build
 
-import (
-	"fmt"
-	"neon/util"
-	"strings"
+const (
+	DEFAULT_LOCAL_REPOSITORY    = "~/.neon"
+	DEFAULT_DOWNLOAD_REPOSITORY = "http://sweetohm.net/neon"
 )
 
-type Repositories []Repository
+type Repositories struct {
+	Local    LocalRepository
+	Download []DownloadRepository
+}
 
 func NewRepositories() Repositories {
-	repositories := []Repository{NewLocalRepository()}
+	repositories := Repositories{
+		Local:    NewFileRepository(DEFAULT_LOCAL_REPOSITORY),
+		Download: []DownloadRepository{NewHttpRepository(DEFAULT_DOWNLOAD_REPOSITORY)},
+	}
 	return repositories
 }
 
 func (repos Repositories) GetResource(path string) ([]byte, error) {
-	if strings.HasPrefix(path, ":") {
-		for _, repo := range repos {
-			resource, err := repo.GetResource(path)
-			if err != nil {
-				return nil, err
-			}
-			if resource != nil {
-				return resource, nil
-			}
+	return repos.Local.GetResource(path)
+}
+
+func (repos Repositories) Get(plugin string) ([]byte, error) {
+	var err error
+	var bytes []byte
+	for _, repo := range repos.Download {
+		bytes, err = repo.Get(plugin)
+		if err == nil {
+			return bytes, nil
 		}
-	} else {
-		bytes, err := util.ReadFile(path)
-		if err != nil {
-			return nil, fmt.Errorf("loading resource '%s': %v", path, err)
-		}
-		return bytes, nil
 	}
-	return nil, nil
+	return nil, fmt.Errorf("Could not find plugin '%s' in repositories", plugin)
 }

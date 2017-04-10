@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	FILE_MODE     = 0644
 	DIR_FILE_MODE = 0755
 )
 

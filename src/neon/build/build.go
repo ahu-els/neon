@@ -164,6 +164,11 @@ func (build *Build) GetEnvironment() map[string]string {
 	return environment
 }
 
+func (build *Build) Get(plugin string) ([]byte, error) {
+	bytes, err := build.Repositories.Get(plugin)
+	return bytes, err
+}
+
 func (build *Build) GetTargets() map[string]*Target {
 	var targets = make(map[string]*Target)
 	for _, parent := range build.Parents {
